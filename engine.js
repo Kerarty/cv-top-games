@@ -31,9 +31,15 @@ var ENGINE = (function () {
      ЮНИТ. Это данные, а не объект с поведением: всё поведение в бою,
      чтобы состояние юнита можно было спокойно копировать в симуляции.
      ------------------------------------------------------------------------- */
+  /* Счётчик идентификаторов. Каждый юнит получает номер, по которому его
+     узнают между тиками: без него анимация не может отличить, кому
+     принадлежит полоска здоровья, когда на поле больше двух бойцов. */
+  var NEXT_ID = 1;
+
   function makeUnit(archId, tier, col, row) {
     var s = BALANCE.statsFor(archId, tier);
     return {
+      id: NEXT_ID++,
       arch: archId,
       tier: tier,
       col: col,
@@ -53,6 +59,7 @@ var ENGINE = (function () {
 
   function clone(u) {
     return {
+      id: u.id,
       arch: u.arch, tier: u.tier, col: u.col, row: u.row,
       hp: u.hp, maxHp: u.maxHp, atk: u.atk, def: u.def,
       spd: u.spd, crit: u.crit, range: u.range, cost: u.cost,
@@ -194,10 +201,15 @@ var ENGINE = (function () {
 
   /* -------------------------------------------------------------------------
      ОДИН БОЙ.
-     -------------------------------------------------------------------------
-     Возвращает отчёт для отрисовки и, если нужно, полные логи для
-     симуляции. Бой идёт тиками по BALANCE.tick и заканчивается, когда
-     одна сторона пуста или истёк лимит тиков.
+     ---------------------------------------------------------------------------
+     Считает бой по тикам и возвращает всё, что нужно, чтобы показать его
+     на экране: стартовые позиции обеих сторон (start) и ленту событий
+     (events). Именно эта пара делает бой просматриваемым — иначе страница
+     знала бы, кто выиграл, но не как именно.
+
+     Стороны стартуют на противоположных половинах поля: своя слева,
+     противник справа, между ними пустая полоса. Без неё отряды стоят
+     вплотную и сближение вообще не читается.
      ------------------------------------------------------------------------- */
   var MAX_TICKS = 400; // предохранитель от бесконечной ничьей
 
@@ -212,6 +224,24 @@ var ENGINE = (function () {
     var log = [];
     var events = [];
     var ticks = 0;
+
+    // Противник сдвигается ровно на свою половину, без зазора: отряды
+    // встают вплотную и бой начинается сразу. С пустой колонкой посередине
+    // ближний бой не успевал сойтись — его расстреливали на подходе, и
+    // винрейт падал до 10% вне зависимости от характеристик.
+    // Своя сторона остаётся на месте: игрок ставил юнитов по этим
+    // координатам и должен видеть их ровно там, куда поставил.
+    var COLS = BALANCE.board.cols;
+    for (var s = 0; s < b.length; s++) b[s].col += COLS;
+
+    var start = {
+      own: a.map(snapshot),
+      enemy: b.map(snapshot),
+      // Поле боя вдвое шире поля сборки: слева игрок, справа противник.
+      cols: COLS * 2,
+      rows: BALANCE.board.rows,
+      split: COLS,
+    };
 
     function note(tick, text, tone) {
       if (collect) log.push({ tick: tick, text: text, tone: tone || "" });
@@ -250,9 +280,29 @@ var ENGINE = (function () {
       seconds: +(ticks * BALANCE.tick).toFixed(2),
       ownLeft: aliveA2,
       enemyLeft: aliveB2,
+      start: start,
+      final: {
+        own: a.filter(isAlive).map(snapshot),
+        enemy: b.filter(isAlive).map(snapshot),
+      },
       log: log,
       events: events,
       survivors: a.filter(isAlive),
+    };
+  }
+
+  /* Снимок юнита для отрисовки: всё, что нужно знать сцене о бойце.
+     Копия, а не сам юнит: сцена не должна иметь возможности испортить
+     состояние боя, который уже посчитан. */
+  function snapshot(u) {
+    return {
+      id: u.id,
+      arch: u.arch,
+      tier: u.tier,
+      col: u.col,
+      row: u.row,
+      hp: Math.max(0, Math.round(u.hp)),
+      maxHp: u.maxHp,
     };
   }
 
@@ -325,7 +375,19 @@ var ENGINE = (function () {
         // Никого в радиусе — идём вперёд и ждём следующего тика.
         // Иначе бой упирается в MAX_TICKS и рисует ничью там,
         // где на самом деле должно быть решение по урону.
-        advance(u, foes);
+        var before = { col: u.col, row: u.row };
+        if (advance(u, foes) && collect && events) {
+          // Шаг тоже попадает в ленту: без него на экране юнит телепортировался
+          // бы между тиками, и сближение отрядов выглядело бы как моргание.
+          events.push({
+            tick: tickNo,
+            type: "move",
+            side: sideId,
+            id: u.id,
+            from: before,
+            to: { col: u.col, row: u.row },
+          });
+        }
         u.cd = 1 / u.spd;
         continue;
       }
@@ -337,10 +399,14 @@ var ENGINE = (function () {
       if (collect && events) {
         events.push({
           tick: tickNo,
+          type: "hit",
           side: sideId,
+          id: u.id,
+          targetId: target.id,
           from: { col: u.col, row: u.row },
           to: { col: target.col, row: target.row },
           amount: Math.round(dmg),
+          hpAfter: Math.max(0, Math.round(target.hp)),
           dead: target.hp <= 0,
         });
       }
@@ -520,25 +586,24 @@ var ENGINE = (function () {
     var rng = makeRng(seed == null ? BALANCE.sim.seed : seed);
     var done = 0, wins = 0, losses = 0, draws = 0, seconds = 0, ticks = 0;
 
-    /* Раскладка на противоположные половины поля. */
-    function layout(squad, side) {
+    /* Раскладка по рядам и клеткам внутри своей половины.
+       Сдвиг противника на правую половину делает сама simulate, поэтому
+       здесь обе стороны раскладываются в пределах 4×4 — иначе противник
+       сдвигался бы дважды и оказывался за краем поля. */
+    function layout(squad, rng2) {
       var slots = [];
       for (var c = 0; c < BALANCE.board.cols; c++) {
         for (var r = 0; r < BALANCE.board.rows; r++) slots.push({ c: c, r: r });
       }
       // Перемешивание детерминированное: тот же сид — та же раскладка.
       for (var i = slots.length - 1; i > 0; i--) {
-        var j = (rng() * (i + 1)) | 0;
+        var j = (rng2() * (i + 1)) | 0;
         var t = slots[i]; slots[i] = slots[j]; slots[j] = t;
       }
-      var half = Math.ceil(slots.length / 2);
-      var ownSlots = slots.slice(0, half);
-      var foeSlots = slots.slice(half);
-      var bank = side === 0 ? ownSlots : foeSlots;
       var out = [];
       for (var k = 0; k < squad.length; k++) {
         var u = clone(squad[k]);
-        var pos = bank[k % bank.length];
+        var pos = slots[k % slots.length];
         u.col = pos.c;
         u.row = pos.r;
         out.push(u);
@@ -547,8 +612,8 @@ var ENGINE = (function () {
     }
 
     function oneBattle() {
-      var own = layout(ownFactory().squad, 0);
-      var foe = layout(enemyFactory().squad, 1);
+      var own = layout(ownFactory().squad, rng);
+      var foe = layout(enemyFactory().squad, rng);
       var res = simulate(own, foe, { rng: rng, log: false });
       seconds += res.seconds;
       ticks += res.ticks;

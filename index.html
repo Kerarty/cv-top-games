@@ -21,6 +21,7 @@
     <nav class="nav" aria-label="Разделы">
       <a href="#lab" data-spy data-i18n="nav.lab"></a>
       <a href="#about" data-spy data-i18n="nav.about"></a>
+      <a href="#education" data-spy data-i18n="nav.education"></a>
       <a href="#projects" data-spy data-i18n="nav.projects"></a>
       <a href="#process" data-spy data-i18n="nav.process"></a>
       <a href="#skills" data-spy data-i18n="nav.skills"></a>
@@ -75,7 +76,16 @@
               <span class="hud-item"><b id="labEnergy">0</b> <span data-i18n="lab.combat.energy"></span></span>
               <span class="hud-item"><b id="labUnits">0</b> <span data-i18n="lab.combat.you"></span></span>
             </div>
-            <canvas id="labBoard" aria-label="Поле отряда"></canvas>
+            <div class="board-sides" id="labSides">
+              <span class="side-tag side-own" data-i18n="lab.combat.you"></span>
+              <span class="side-vs">VS</span>
+              <span class="side-tag side-enemy" data-i18n="lab.combat.enemy"></span>
+            </div>
+            <canvas id="labBoard" aria-label="Поле боя"></canvas>
+            <div class="battle-bar" id="labBattleBar">
+              <span class="battle-tick" id="labTick">0 / 0</span>
+              <button id="labSpeed" class="btn btn-ghost btn-xs" type="button">1×</button>
+            </div>
             <p class="lab-prompt" data-i18n="lab.combat.prompt"></p>
           </div>
 
@@ -179,22 +189,50 @@
   </div>
 </section>
 
-<!-- 03 / ПРОЕКТЫ -------------------------------------------------------- -->
-<section id="projects" class="sec">
+<!-- 03 / ОБРАЗОВАНИЕ ---------------------------------------------------- -->
+<section id="education" class="sec">
   <div class="wrap">
     <header class="sec-head" data-reveal>
       <p class="sec-num">03</p>
+      <h2 class="sec-title" data-i18n="education.heading"></h2>
+    </header>
+    <div class="edu-grid" data-reveal>
+      <div class="edu-card">
+        <h3 class="edu-name" data-i18n="education.degree"></h3>
+        <p class="edu-field" data-i18n="education.field"></p>
+        <p class="note" data-i18n="education.lead"></p>
+        <div class="edu-meta">
+          <span class="fact" data-i18n="education.degreeShort"></span>
+          <span class="fact" data-i18n="education.years"></span>
+        </div>
+      </div>
+      <div class="edu-card">
+        <h3 class="edu-name" data-i18n="education.langsTitle"></h3>
+        <ul class="lang-list">
+          <li><span data-i18n="langs.native"></span></li>
+          <li><span data-i18n="langs.english"></span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 04 / ПРОЕКТЫ -------------------------------------------------------- -->
+<section id="projects" class="sec">
+  <div class="wrap">
+    <header class="sec-head" data-reveal>
+      <p class="sec-num">04</p>
       <h2 class="sec-title" data-i18n="projects.heading"></h2>
     </header>
     <div id="projectList" class="projects"></div>
   </div>
 </section>
 
-<!-- 04 / МЕТОД ---------------------------------------------------------- -->
+<!-- 05 / МЕТОД ---------------------------------------------------------- -->
 <section id="process" class="sec">
   <div class="wrap">
     <header class="sec-head" data-reveal>
-      <p class="sec-num">04</p>
+      <p class="sec-num">05</p>
       <h2 class="sec-title" data-i18n="process.heading"></h2>
       <p class="sec-lead" data-i18n="process.lead"></p>
     </header>
@@ -206,32 +244,23 @@
   </div>
 </section>
 
-<!-- 05 / НАВЫКИ --------------------------------------------------------- -->
+<!-- 06 / НАВЫКИ --------------------------------------------------------- -->
 <section id="skills" class="sec">
   <div class="wrap">
     <header class="sec-head" data-reveal>
-      <p class="sec-num">05</p>
+      <p class="sec-num">06</p>
       <h2 class="sec-title" data-i18n="skills.heading"></h2>
       <p class="sec-lead" data-i18n="skills.lead"></p>
     </header>
     <div id="skillGroups" class="skills" data-reveal></div>
-
-    <div class="spec" data-reveal>
-      <h3 data-i18n="spec.heading"></h3>
-      <p class="note" data-i18n="spec.lead"></p>
-      <div id="specRows" class="spec-rows"></div>
-      <h4 class="spec-sub" data-i18n="spec.metricsTitle"></h4>
-      <p class="note" data-i18n="spec.metricsNote"></p>
-      <div id="specMetrics" class="metrics"></div>
-    </div>
   </div>
 </section>
 
-<!-- 06 / КОНТАКТЫ + CHANGELOG ------------------------------------------ -->
+<!-- 07 / КОНТАКТЫ + CHANGELOG ------------------------------------------ -->
 <section id="contacts" class="sec sec-last">
   <div class="wrap">
     <header class="sec-head" data-reveal>
-      <p class="sec-num">06</p>
+      <p class="sec-num">07</p>
       <h2 class="sec-title" data-i18n="contacts.heading"></h2>
       <p class="sec-lead" data-i18n="contacts.sub"></p>
     </header>

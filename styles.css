@@ -83,16 +83,16 @@ a { color: inherit; }
   border-bottom: 1px solid var(--border);
 }
 .topbar-in { display: flex; align-items: center; gap: 20px; min-height: 62px; }
-.brand { display: flex; align-items: baseline; gap: 10px; text-decoration: none; margin-right: auto; flex-wrap: nowrap; white-space: nowrap; }
-.brand-name { font: 700 17px var(--display); }
+.brand { display: flex; align-items: baseline; gap: 10px; text-decoration: none; margin-right: auto; flex-wrap: nowrap; white-space: nowrap; min-width: 0; }
+.brand-name { font: 700 17px var(--display); white-space: nowrap; }
 .brand-role {
   font-size: 13px; color: var(--muted);
   /* Подсказка скрывается раньше, чем ломает шапку на две строки:
      на узком экране важнее меню, чем должность. */
-  overflow: hidden; text-overflow: ellipsis; max-width: 190px;
+  overflow: hidden; text-overflow: ellipsis; max-width: 190px; white-space: nowrap;
 }
 
-.nav { display: flex; gap: 4px; align-items: center; }
+.nav { display: flex; gap: 4px; align-items: center; min-width: 0; }
 .nav a {
   padding: 8px 13px; border-radius: 999px;
   font-size: 14px; color: var(--muted); text-decoration: none; white-space: nowrap;
@@ -182,8 +182,33 @@ a { color: inherit; }
 }
 .hud { display: flex; gap: 18px; font-size: 13px; color: var(--muted); margin-bottom: 8px; }
 .hud-item b { color: var(--ink); font-family: var(--display); font-size: 15px; }
+
+/* Подписи сторон видны только во время боя: в сборке противника на поле
+   нет, и висящая надпись «противник» только пугает. */
+.board-sides {
+  display: none;
+  align-items: center; justify-content: center; gap: 14px;
+  margin-bottom: 6px; font-size: 11px; letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.board-sides.is-visible { display: flex; }
+.side-tag { font-weight: 700; }
+.side-own { color: var(--accent-text); }
+.side-enemy { color: #D07070; }
+.side-vs { color: var(--faint); font-size: 10px; }
+
 #labBoard { display: block; width: 100%; height: 400px; touch-action: manipulation; cursor: pointer; }
-#labBoard.is-fighting { cursor: progress; }
+#labBoard.is-fighting { cursor: default; }
+
+/* Панель боя: номер тика и скорость. Появляется вместе с широким полем. */
+.battle-bar {
+  display: none; align-items: center; justify-content: space-between;
+  gap: 10px; margin-top: 8px;
+}
+.battle-bar.is-visible { display: flex; }
+.battle-tick { font: 600 12px var(--mono); color: var(--faint); }
+.btn-xs { min-height: 28px; padding: 0 12px; font-size: 12px; border-radius: 999px; }
+
 .lab-prompt { font-size: 12.5px; color: var(--faint); text-align: center; margin: 8px 0 0; }
 
 .lab-side { display: flex; flex-direction: column; gap: 14px; }
@@ -302,6 +327,19 @@ a { color: inherit; }
 .example h3 { font-size: 14px; color: var(--accent-text); margin-bottom: 8px; text-transform: uppercase; letter-spacing: .08em; }
 .example p { font-size: 15.5px; color: var(--ink); margin: 0; }
 
+/* ОБРАЗОВАНИЕ ------------------------------------------------------------ */
+.edu-grid { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 16px; margin-top: 30px; }
+.edu-card { padding: 24px; border-radius: var(--r); background: var(--card); border: 1px solid var(--border); }
+.edu-name { font-size: 19px; margin-bottom: 8px; }
+.edu-field { font-size: 15px; color: var(--accent-text); margin-bottom: 12px; }
+.edu-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.lang-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.lang-list li { position: relative; padding-left: 18px; font-size: 14.5px; color: var(--muted); }
+.lang-list li::before {
+  content: ''; position: absolute; left: 0; top: .5em;
+  width: 7px; height: 7px; border-radius: 2px; background: var(--accent);
+}
+
 /* НАВЫКИ ------------------------------------------------------------------ */
 .skills { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 30px; }
 .skill-col { padding: 20px; border-radius: var(--r); background: var(--card); border: 1px solid var(--border); }
@@ -353,17 +391,33 @@ a { color: inherit; }
 @media (max-width: 1000px) {
   .charts, .projects, .rules, .skills, .metrics, .contacts { grid-template-columns: repeat(2, 1fr); }
   .lab-fight { grid-template-columns: 1fr; }
-  .about-grid { grid-template-columns: 1fr; }
+  .about-grid, .edu-grid { grid-template-columns: 1fr; }
 }
+/* ПОМЕЩАЕТСЯ ЛИ ШАПКА В ШИРИНУ
+   Пунктов меню стало семь, и на ноутбуке они перестали помещаться вместе
+   с именем и переключателем языка — шапка начинала растягивать страницу
+   по горизонтали. Отступать приходится по порядку важности: сначала
+   должность, затем кнопка «Контакты», и только потом всё меню. */
+@media (max-width: 1180px) {
+  .brand-role { display: none; }
+}
+@media (max-width: 1040px) {
+  .nav a { padding: 8px 10px; font-size: 13.5px; }
+}
+@media (max-width: 960px) {
+  .nav { display: none; }
+}
+
 @media (max-width: 720px) {
   body { font-size: 16px; }
   .wrap { padding: 0 18px; }
   .sec { padding: 58px 0; }
   .hero { padding: 58px 0 48px; }
-  .nav { display: none; }
   .stats, .charts, .projects, .rules, .skills, .metrics, .contacts { grid-template-columns: 1fr; }
   .panel { padding: 18px; }
-  #labBoard { height: 320px; }
+  /* Поле боя в восемь колонок на телефоне: клетка прижимается к высоте,
+     иначе юниты превращаются в узкие полоски. */
+  #labBoard { height: 260px; }
   .tabs { overflow-x: auto; }
   .tab { flex: 0 0 auto; padding: 0 18px; }
   .spec-row { grid-template-columns: 1fr; gap: 3px; }

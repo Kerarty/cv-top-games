@@ -76,7 +76,6 @@
 
     buildDynamic();
     LAB.rebuild(lang);
-    applyTemplateMetrics();
   }
 
   /* -------------------------------------------------------------------------
@@ -170,33 +169,6 @@
       groups.appendChild(col);
     }
 
-    // Технические детали
-    var spec = els.specRows;
-    spec.innerHTML = "";
-    var sr = CONTENT[lang].spec.rows;
-    for (var x = 0; x < sr.length; x++) {
-      var row = el("div", "spec-row");
-      row.appendChild(el("div", "spec-k", sr[x].k));
-      row.appendChild(el("div", "spec-v", sr[x].v));
-      spec.appendChild(row);
-    }
-
-    // Замеры сборки
-    var met = els.specMetrics;
-    met.innerHTML = "";
-    var ms = CONTENT[lang].spec.metrics;
-    for (var m = 0; m < ms.length; m++) {
-      var mrow = el("div", "metric");
-      var mk = el("div", "metric-k", ms[m].k);
-      var mv = el("div", "metric-v");
-      mv.setAttribute("data-tpl", ms[m].v);
-      var mn = el("div", "metric-note", ms[m].note);
-      mrow.appendChild(mk);
-      mrow.appendChild(mv);
-      mrow.appendChild(mn);
-      met.appendChild(mrow);
-    }
-
     // changelog
     var log = els.changelog;
     log.innerHTML = "";
@@ -230,88 +202,6 @@
         a.setAttribute("rel", "noopener");
       }
       contacts.appendChild(a);
-    }
-  }
-
-  /* -------------------------------------------------------------------------
-     ЗАМЕРЫ СБОРКИ
-     -------------------------------------------------------------------------
-     Размер считается по реальным файлам, а не «примерно 300 килобайт».
-     Если файлы недоступны (например, при открытии из file:// в некоторых
-     браузерах), вместо цифры ставится прочерк — выдуманное число хуже
-     отсутствующего.
-     ------------------------------------------------------------------------- */
-  function fmtSize(bytes) {
-    if (bytes < 1024) return bytes + " Б";
-    return (bytes / 1024).toFixed(1) + " КБ";
-  }
-
-  function applyTemplateMetrics() {
-    var nodes = document.querySelectorAll("[data-tpl]");
-    for (var i = 0; i < nodes.length; i++) {
-      var tpl = nodes[i].getAttribute("data-tpl");
-      if (tpl.indexOf("{{size}}") >= 0) {
-        tpl = tpl.replace("{{size}}", measured.size == null ? "—" : measured.size);
-      }
-      if (tpl.indexOf("{{ttf}}") >= 0) {
-        tpl = tpl.replace("{{ttf}}", measured.ttf == null ? "—" : measured.ttf);
-      }
-      nodes[i].textContent = tpl;
-    }
-  }
-
-  var measured = { size: null, ttf: null };
-
-  /* Время до первого кадра. Источники перебираются от более точного к более
-     общему: Navigation Timing есть не везде, Paint Timing приходит не
-     сразу, а performance.now() в конце загрузки — грубый, но всегда есть.
-     Если не удалось ничего, остаётся прочерк: молчаливая подмена на ноль
-     выглядела бы как «страница грузится мгновенно». */
-  function measureTTF() {
-    var navMs = null;
-
-    try {
-      var nav = performance.getEntriesByType("navigation")[0];
-      if (nav) {
-        if (nav.domContentLoadedEventEnd > 0) navMs = nav.domContentLoadedEventEnd;
-        else if (nav.responseEnd > 0) navMs = nav.responseEnd;
-      }
-    } catch (e) { /* нет Navigation Timing */ }
-
-    if (!navMs) {
-      try {
-        var paint = performance.getEntriesByType("paint");
-        for (var i = 0; i < paint.length; i++) {
-          if (paint[i].name === "first-contentful-paint") { navMs = paint[i].startTime; break; }
-        }
-      } catch (e) { /* нет Paint Timing */ }
-    }
-
-    if (!navMs && typeof performance.now === "function") navMs = performance.now();
-
-    return navMs != null ? Math.round(navMs) + " мс" : null;
-  }
-
-  /* Размер файлов. Считается по тем же адресам, что и в <script>/<link>,
-     и честно остаётся пустым, если fetch запрещён политикой страницы. */
-  function measureSize(onDone) {
-    if (location.protocol === "file:") { onDone(null); return; }
-
-    var files = ["index.html", "styles.css", "content.js", "balance.js", "engine.js", "lab.js", "main.js"];
-    var total = 0, left = files.length, got = 0;
-
-    for (var i = 0; i < files.length; i++) {
-      (function (name) {
-        fetch(name, { method: "HEAD" })
-          .then(function (res) {
-            var len = res.headers.get("content-length");
-            if (len) { total += parseInt(len, 10); got++; }
-          })
-          .catch(function () {})
-          .then(function () {
-            if (--left === 0) onDone(got === files.length ? fmtSize(total) : null);
-          });
-      })(files[i]);
     }
   }
 
@@ -439,8 +329,6 @@
       projects: document.getElementById("projectList"),
       rules: document.getElementById("ruleList"),
       skillGroups: document.getElementById("skillGroups"),
-      specRows: document.getElementById("specRows"),
-      specMetrics: document.getElementById("specMetrics"),
       changelog: document.getElementById("changelogList"),
       contacts: document.getElementById("contactList"),
     };
@@ -456,13 +344,6 @@
     initAnchors();
 
     applyLang(lang);
-
-    measured.ttf = measureTTF();
-    applyTemplateMetrics();
-    measureSize(function (size) {
-      measured.size = size;
-      applyTemplateMetrics();
-    });
   }
 
   if (document.readyState === "loading") {

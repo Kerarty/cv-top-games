@@ -27,11 +27,17 @@ var CONTENT = {
       hero: "Отклик",
       lab: "Баланс-лаборатория",
       about: "О себе",
+      education: "Образование",
       projects: "Проекты",
       process: "Метод",
       skills: "Навыки",
       contacts: "Контакты",
       text: "Резюме текстом",
+    },
+
+    langs: {
+      native: "Русский — родной",
+      english: "Английский — A2, продолжаю",
     },
 
     hero: {
@@ -148,20 +154,42 @@ var CONTENT = {
     about: {
       heading: "О себе",
       lead:
-        "Геймдизайнер с профильным техническим образованием в игровой индустрии. " +
-        "Понимаю, как механика превращается в реализацию, и проверяю гипотезы " +
-        "замерами, а не мнением.",
+        "Начинающий геймдизайнер с профильным техническим образованием в игровой " +
+        "индустрии. Хорошо понимаю основные игровые механики и особенно интересуюсь " +
+        "балансом боевых характеристик, экономикой и влиянием изменений на игровой процесс.",
       body:
-        "Коммерческого опыта в геймдизайне пока нет — и это честно. Зато есть привычка " +
-        "доводить: три законченных проекта, один из них с пятнадцатью плейтест-сессиями " +
-        "и итеративной балансировкой по итогам каждой. Лаборатория выше — тот же цикл " +
-        "работы, просто сделанный настолько, чтобы его можно было проверить руками.",
+        "Имею аналитический и системный склад мышления, техническую базу в " +
+        "программировании и работе с данными. Самостоятельно изучаю геймдизайн, " +
+        "баланс и анализ игровых систем и развиваю собственные проекты. " +
+        "Техническое образование позволяет понимать взаимосвязь между дизайном " +
+        "механики и её реализацией, а опыт тестирования — системно искать " +
+        "проблемы и проверять изменения, а не гадать, что именно сломалось.",
+      gap:
+        "Коммерческого опыта в геймдизайне пока нет — и это честно. Зато есть " +
+        "привычка доводить: три законченных проекта, один из них с пятнадцатью " +
+        "плейтест-сессиями и итеративной балансировкой по итогам каждой. " +
+        "Лаборатория выше — тот же цикл работы, просто сделанный настолько, " +
+        "чтобы его можно было проверить руками.",
       wantTitle: "Почему LUDUS",
       want: [
         "Мерж-автобатлер — это ровно та петля, которую я разбирал в «Королевствах Эридора»: слияние, ресурс, решение по цене и силе",
         "Студия публикует метрики и разбирает игровые решения открыто — такой подход мне близок",
         "Проект в продакшене, а не в прототипе: значит решения принимаются под нагрузкой на живых игроках",
       ],
+    },
+
+    education: {
+      heading: "Образование",
+      degree: "Белорусский государственный университет информатики и радиоэлектроники",
+      field: "Информационные системы и технологии в игровой индустрии",
+      degreeShort: "Бакалавр, инженер-программист",
+      years: "2023 — 2027",
+      lead:
+        "Специальность на стыке инженерии и игровой индустрии: часть программы — " +
+        "программирование и работа с данными, часть — игровые системы. " +
+        "Поэтому проектирование механики я сразу считаю вместе с реализацией, " +
+        "а не «нарисую и передам в разработку».",
+      langsTitle: "Языки",
     },
 
     projects: {
@@ -261,27 +289,6 @@ var CONTENT = {
       ],
     },
 
-    spec: {
-      heading: "Про эту страницу",
-      lead:
-        "Сделана по правилам, которые сама предъявляет к игровым тулам: открывается " +
-        "с телефона, играется пальцем и ничего не просит установить.",
-      rows: [
-        { k: "Зависимости", v: "Ноль. Ни одного CDN — у рекрутера не должен отваливаться интернет" },
-        { k: "Открытие", v: "Двойным кликом с диска и с любого статик-хостинга" },
-        { k: "Движок", v: "Симуляция на тиках, детерминированный генератор: 1000 боёв воспроизводимы" },
-        { k: "Доступность", v: "Клавиатура, prefers-reduced-motion, контраст текста" },
-        { k: "Печать", v: "Ctrl+P печатает текстовое резюме в одну страницу A4" },
-      ],
-      metricsTitle: "Замеры этой сборки",
-      metricsNote: "Значения сняты в этой сборке, а не взяты из документации.",
-      metrics: [
-        { k: "Размер", v: "{{size}}", note: "файлов, без сжатия" },
-        { k: "До первого кадра", v: "{{ttf}}", note: "от открытия страницы" },
-        { k: "Запросов после загрузки", v: "0", note: "файлы уже на месте" },
-      ],
-    },
-
     contacts: {
       heading: "Давайте познакомимся",
       sub: "Готов к любому формату: звонок, созвон или тестовое прямо из переписки.",
@@ -297,6 +304,7 @@ var CONTENT = {
       heading: "changelog",
       lead: "Резюме как релиз. Каждая строка — что изменилось и зачем.",
       lines: [
+        { v: "v0.4", t: "Бой показан целиком: противник на своём поле, полосы здоровья, урон по тикам", d: "результат без процесса ничего не доказывает" },
         { v: "v0.3", t: "Добавлен прогон 1000 боёв и вердикт по винрейту", d: "визуализация проблемы" },
         { v: "v0.2", t: "Таблица характеристик стала редактируемой", d: "проверка гипотез руками, а не на словах" },
         { v: "v0.1", t: "Первая версия лаборатории: сетка, мерж, бой по тикам", d: "показать, как считается баланс" },
@@ -329,11 +337,17 @@ var CONTENT = {
       hero: "Application",
       lab: "Balance lab",
       about: "About",
+      education: "Education",
       projects: "Projects",
       process: "Method",
       skills: "Skills",
       contacts: "Contacts",
       text: "Résumé as text",
+    },
+
+    langs: {
+      native: "Russian — native",
+      english: "English — A2, in progress",
     },
 
     hero: {
@@ -452,10 +466,17 @@ var CONTENT = {
     about: {
       heading: "About me",
       lead:
-        "Game designer with a technical degree in game development. I understand how " +
-        "a mechanic turns into an implementation, and I test hypotheses with numbers " +
-        "rather than opinions.",
+        "Junior game designer with a technical degree in game development. I read game " +
+        "mechanics well and am especially interested in combat balance, economy, and how " +
+        "a single change ripples through gameplay.",
       body:
+        "I have an analytical, systems-oriented way of thinking and a technical base " +
+        "in programming and working with data. I study game design, balance and " +
+        "analytics on my own and keep building my own projects along the way. The " +
+        "technical degree lets me understand how a mechanic turns into an " +
+        "implementation, and testing experience lets me find problems systematically " +
+        "and check changes instead of guessing what broke.",
+      gap:
         "I have no commercial game design experience yet, and I would rather say so " +
         "plainly. What I do have is a habit of finishing things: three completed " +
         "projects, one of them with fifteen playtest sessions and iteration based on " +
@@ -467,6 +488,20 @@ var CONTENT = {
         "The studio publishes metrics and reviews its design decisions openly — that approach is close to mine",
         "The project is in production, not prototype: decisions get made under the load of real players",
       ],
+    },
+
+    education: {
+      heading: "Education",
+      degree: "Belarusian State University of Informatics and Radioelectronics",
+      field: "Information systems and technologies in the game industry",
+      degreeShort: "Bachelor, software engineer",
+      years: "2023 — 2027",
+      lead:
+        "The degree sits between engineering and game development: part of the " +
+        "programme is programming and data work, part is game systems. That is why I " +
+        "design a mechanic together with its implementation rather than handing it " +
+        "off as a drawing.",
+      langsTitle: "Languages",
     },
 
     projects: {
@@ -567,27 +602,6 @@ var CONTENT = {
       ],
     },
 
-    spec: {
-      heading: "About this page",
-      lead:
-        "Built by the rules we hold game tools to: it opens on a phone, plays " +
-        "with a thumb, and asks for no installation.",
-      rows: [
-        { k: "Dependencies", v: "None. Not a single CDN" },
-        { k: "Opening", v: "Double-click from disk, or any static host" },
-        { k: "Engine", v: "Tick-based simulation, deterministic RNG: 1000 battles reproduce exactly" },
-        { k: "Accessibility", v: "Keyboard, prefers-reduced-motion, text contrast" },
-        { k: "Print", v: "Ctrl+P prints the text résumé as a single A4 page" },
-      ],
-      metricsTitle: "Measured on this build",
-      metricsNote: "Taken from this build, not from documentation.",
-      metrics: [
-        { k: "Size", v: "{{size}}", note: "files, uncompressed" },
-        { k: "First frame", v: "{{ttf}}", note: "from page open" },
-        { k: "Requests after load", v: "0", note: "once files are in" },
-      ],
-    },
-
     contacts: {
       heading: "Let us talk",
       sub: "Happy with any format: a call, a video chat, or a test straight in chat.",
@@ -603,6 +617,7 @@ var CONTENT = {
       heading: "changelog",
       lead: "The résumé as a release. Every line is what changed and why.",
       lines: [
+        { v: "v0.4", t: "The fight is shown in full: opponent on its own side, health bars, damage by tick", d: "a result without the process proves nothing" },
         { v: "v0.3", t: "Added the 1000-battle run and the winrate verdict", d: "making the problem visible" },
         { v: "v0.2", t: "The stats table became editable", d: "testing hypotheses by hand, not in words" },
         { v: "v0.1", t: "First version of the lab: grid, merge, tick-based combat", d: "showing how balance is calculated" },

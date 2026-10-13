@@ -56,15 +56,47 @@ var LAB = (function () {
     return energy >= BALANCE.costFor(arch, tier);
   }
 
-  /* Сбрасывает поле к начальному состоянию. */
+  /* Сбрасывает поле к начальному состоянию и гасит бой, если он шёл. */
   function resetBoard() {
+    stopPlayback();
     grid = ENGINE.makeGrid();
     energy = BALANCE.energy.start;
     selected = { arch: "melee", tier: 1 };
     lastBatch = null;
-    drawBoard();
+    showBuildView();
     updateHUD();
     drawLog(labText("combat", "waiting"), "muted");
+  }
+
+  /* Возврат к режиму сборки: поле снова узкое, показывает только свой отряд. */
+  function showBuildView() {
+    view.mode = "build";
+    view.cols = BALANCE.board.cols;
+    view.rows = BALANCE.board.rows;
+    view.floating = [];
+    view.units = listUnitsForView();
+    if (els.sideLabels) els.sideLabels.classList.remove("is-visible");
+    if (els.battleBar) els.battleBar.classList.remove("is-visible");
+    drawScene();
+  }
+
+  /* Юниты сетки в виде сцены. Позиция фиксирована: в сборке анимировать
+     нечего, юнит либо стоит на месте, либо только что появился. */
+  function listUnitsForView() {
+    var out = [];
+    for (var r = 0; r < BALANCE.board.rows; r++) {
+      for (var c = 0; c < BALANCE.board.cols; c++) {
+        var u = ENGINE.gridAt(grid, c, r);
+        if (!u) continue;
+        out.push({
+          id: u.id, arch: u.arch, tier: u.tier,
+          col: u.col, row: u.row, dc: u.col, dr: u.row,
+          hp: u.hp, maxHp: u.maxHp,
+          side: "own", anim: 1, alpha: 1, hitFlash: 0, dead: false, showHp: false,
+        });
+      }
+    }
+    return out;
   }
 
   /* Ставит выбранного юнита в клетку и, если рядом нашёлся такой же,
@@ -90,7 +122,8 @@ var LAB = (function () {
     var unit = ENGINE.makeUnit(selected.arch, selected.tier, col, row);
     var done = ENGINE.placeAndMaybeMerge(grid, unit);
 
-    drawBoard();
+    view.units = listUnitsForView();
+    drawScene();
     updateHUD();
 
     if (done > 0) {
@@ -99,9 +132,23 @@ var LAB = (function () {
   }
 
   /* -------------------------------------------------------------------------
-     ОТРИСОВКА ПОЛЯ
+     СЦЕНА
+     ---------------------------------------------------------------------------
+     Один рисовальщик на оба режима. Во время сборки поле узкое (4×4) и
+     показывает только свой отряд, во время боя — широкое (8×4), слева игрок,
+     справа противник. Раньше это были две разные функции, и они разошлись:
+     бой рисовался отдельно, без полос здоровья и без видимого противника.
+
+     Сцена читает состояние из view, а не из сетки напрямую: иначе отрисовка
+     боя и сборки всё равно остались бы разными ветками кода.
      ------------------------------------------------------------------------- */
-  function drawBoard() {
+  var view = { mode: "build", cols: BALANCE.board.cols, rows: BALANCE.board.rows, units: [], floating: [] };
+
+  /* Боевое состояние. Живёт отдельно от сетки сборки: сетка — это то, что
+     игрок расставил, а здесь — то, что происходит в бою. */
+  var fight = null;
+
+  function drawScene() {
     var ctx = els.board.getContext("2d");
     var dpr = Math.min(window.devicePixelRatio || 1, 2.5);
     var rect = els.board.getBoundingClientRect();
@@ -113,46 +160,97 @@ var LAB = (function () {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
 
-    var cols = BALANCE.board.cols, rows = BALANCE.board.rows;
+    var cols = view.cols, rows = view.rows;
+    // Ячейка квадратная и вписывается в высоту: иначе на узком экране
+    // поле вытягивалось в полосу и юниты наезжали на подписи.
     var cell = Math.floor(Math.min(w / cols, h / rows));
-    var pad = Math.round(cell * 0.16);
+    var pad = Math.round(cell * 0.14);
     var ox = Math.round((w - cell * cols) / 2);
     var oy = Math.round((h - cell * rows) / 2);
 
     // Подложка поля
     ctx.save();
-    roundRect(ctx, ox - pad, oy - pad, cell * cols + pad * 2, cell * rows + pad * 2, cell * 0.3);
-    ctx.fillStyle = "rgba(255,255,255,0.035)";
+    roundRect(ctx, ox - pad, oy - pad, cell * cols + pad * 2, cell * rows + pad * 2, cell * 0.28);
+    ctx.fillStyle = view.mode === "fight" ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.035)";
     ctx.fill();
     ctx.strokeStyle = "rgba(255,255,255,0.08)";
     ctx.lineWidth = 1;
     ctx.stroke();
     ctx.restore();
 
-    // Сетка — едва заметная, чтобы поле читалось как поле
+    // Сетка
     ctx.strokeStyle = "rgba(255,255,255,0.05)";
     for (var c = 1; c < cols; c++) {
       ctx.beginPath();
-      ctx.moveTo(ox + c * cell, oy + cell * 0.12);
-      ctx.lineTo(ox + c * cell, oy + cell * rows - cell * 0.12);
+      ctx.moveTo(ox + c * cell, oy + cell * 0.1);
+      ctx.lineTo(ox + c * cell, oy + cell * rows - cell * 0.1);
       ctx.stroke();
     }
     for (var r = 1; r < rows; r++) {
       ctx.beginPath();
-      ctx.moveTo(ox + cell * 0.12, oy + r * cell);
-      ctx.lineTo(ox + cell * cols - cell * 0.12, oy + r * cell);
+      ctx.moveTo(ox + cell * 0.1, oy + r * cell);
+      ctx.lineTo(ox + cell * cols - cell * 0.1, oy + r * cell);
       ctx.stroke();
     }
 
-    // Юниты
-    var rad = cell * 0.32;
-    for (var rr = 0; rr < rows; rr++) {
-      for (var cc = 0; cc < cols; cc++) {
-        var u = ENGINE.gridAt(grid, cc, rr);
-        if (!u) continue;
-        drawUnit(ctx, u, ox + cc * cell + cell / 2, oy + rr * cell + cell / 2, rad, 1);
-      }
+    // Разделитель между половинами: только в бою. Он и читается как
+    // «здесь наши, здесь противник».
+    if (view.mode === "fight") {
+      var mid = ox + cell * BALANCE.board.cols;
+      var grd = ctx.createLinearGradient(0, oy - pad, 0, oy + cell * rows + pad);
+      grd.addColorStop(0, "rgba(198,138,31,0)");
+      grd.addColorStop(0.5, "rgba(198,138,31,0.35)");
+      grd.addColorStop(1, "rgba(198,138,31,0)");
+      ctx.strokeStyle = grd;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(mid, oy - pad);
+      ctx.lineTo(mid, oy + cell * rows + pad);
+      ctx.stroke();
     }
+
+    var rad = cell * 0.3;
+    for (var i = 0; i < view.units.length; i++) {
+      var u = view.units[i];
+      // Позиция плавно догоняет цель: юнит не перескакивает между клетками,
+      // а шагает, и сближение отрядов читается движением, а не морганием.
+      // Промежуточная клетка лежит в dc/dr, целевая — в col/row.
+      var px = ox + (u.dc + (u.col - u.dc) * u.anim) * cell + cell / 2;
+      var py = oy + (u.dr + (u.row - u.dr) * u.anim) * cell + cell / 2;
+      drawUnit(ctx, u, px, py, rad, u.alpha);
+      if (u.showHp) drawHp(ctx, u, px, py + rad * 1.34, cell * 0.52);
+      if (u.hitFlash > 0) drawUnit(ctx, u, px, py, rad * 1.12, u.hitFlash * 0.5);
+    }
+
+    // Всплывающий урон рисуется поверх всего — он и должен читаться первым.
+    for (var k = view.floating.length - 1; k >= 0; k--) {
+      var f = view.floating[k];
+      var fx = ox + f.col * cell + cell / 2;
+      var fy = oy + f.row * cell + cell / 2;
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, 1 - f.age / f.life);
+      ctx.fillStyle = f.color;
+      ctx.font = "700 " + Math.round(cell * 0.34) + "px Outfit, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(f.text, fx, fy - rad * 1.2 - f.age * cell * 0.9);
+      ctx.restore();
+    }
+  }
+
+  /* Полоска здоровья. Без неё бой превращается в мельтешение фигур: видно,
+     что кто-то кого-то бьёт, но не видно, что это меняет. */
+  function drawHp(ctx, u, x, y, w) {
+    var share = Math.max(0, Math.min(1, u.hp / u.maxHp));
+    var h = Math.max(3, w * 0.16);
+    ctx.save();
+    ctx.fillStyle = "rgba(0,0,0,0.45)";
+    roundRect(ctx, x - w / 2, y, w, h, h / 2);
+    ctx.fill();
+    ctx.fillStyle = share > 0.5 ? "#7FC98A" : share > 0.22 ? "#E0A33C" : "#D07070";
+    roundRect(ctx, x - w / 2, y, w * share, h, h / 2);
+    ctx.fill();
+    ctx.restore();
   }
 
   function drawUnit(ctx, u, x, y, rad, alpha) {
@@ -165,7 +263,7 @@ var LAB = (function () {
     if (u.arch === "melee") {
       ctx.arc(x, y, rad, 0, Math.PI * 2);
     } else if (u.arch === "ranged") {
-      ctx.rect(x - rad * 0.86, y - rad * 0.86, rad * 1.72, rad * 1.72);
+      ctx.rect(x - rad * 0.84, y - rad * 0.84, rad * 1.68, rad * 1.68);
     } else if (u.arch === "mounted") {
       ctx.moveTo(x, y - rad);
       ctx.lineTo(x + rad * 0.9, y + rad * 0.7);
@@ -188,9 +286,17 @@ var LAB = (function () {
     ctx.fill();
     ctx.shadowBlur = 0;
 
+    // У врага обводка сверху: стороны отличаются не только положением,
+    // но и видом, иначе в общей свалке их не разобрать.
+    if (u.side === "enemy") {
+      ctx.strokeStyle = "rgba(208,112,112,0.85)";
+      ctx.lineWidth = Math.max(1.5, rad * 0.12);
+      ctx.stroke();
+    }
+
     // Тайр — числом в центре: без него игрок не понимает, что собрал.
-    ctx.fillStyle = "rgba(12,12,15,0.85)";
-    ctx.font = "600 " + Math.round(rad * 0.9) + "px Outfit, sans-serif";
+    ctx.fillStyle = "rgba(12,12,15,0.88)";
+    ctx.font = "600 " + Math.round(rad * 0.92) + "px Outfit, sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(String(u.tier), x, y + 1);
@@ -198,12 +304,20 @@ var LAB = (function () {
     ctx.restore();
   }
 
+  /* Затемнение цвета. Каналы обязательно округляются: при дробном amt
+     сумма получается дробной, toString(16) выдаёт вид «154e82.c28f5»,
+     и addColorStop бросает исключение. Рисование падало целиком — поле
+     оставалось пустым, а бой не двигался. */
   function shade(hex, amt) {
     var n = parseInt(hex.slice(1), 16);
-    var r = Math.max(0, Math.min(255, (n >> 16) + amt * 255));
-    var g = Math.max(0, Math.min(255, ((n >> 8) & 255) + amt * 255));
-    var b = Math.max(0, Math.min(255, (n & 255) + amt * 255));
+    var r = clampChannel((n >> 16) + amt * 255);
+    var g = clampChannel(((n >> 8) & 255) + amt * 255);
+    var b = clampChannel((n & 255) + amt * 255);
     return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+  }
+
+  function clampChannel(v) {
+    return Math.max(0, Math.min(255, Math.round(v)));
   }
 
   function roundRect(ctx, x, y, w, h, r) {
@@ -292,34 +406,250 @@ var LAB = (function () {
   /* -------------------------------------------------------------------------
      БОЙ
      ------------------------------------------------------------------------- */
-  function fight() {
+  /* Функция называется startFight, а не fight: рядом в модуле живёт переменная
+     fight с состоянием боя, и объявление `var fight = null` перетирало
+     одноимённую функцию. Обработчик клика молча вешался на null, и кнопка
+     «В бой» не делала ровно ничего. */
+  function startFight() {
     var mine = ownSquad();
     if (!mine.squad.length) return;
 
-    // Противник собирается тем же бюджетом — иначе винрейт показывает
+    // Противник собирается тем же бюджетом — иначе бой показывает
     // не баланс архитектуры, а разницу бюджетов.
     var rng = ENGINE.makeRng(Date.now() % 100000);
     var opp = ENGINE.buildOpponent(rng, mine.spent, BALANCE.board.cols, BALANCE.board.rows);
 
-    els.board.classList.add("is-fighting");
-    els.fightBtn.disabled = true;
-
     var res = ENGINE.simulate(mine.squad, opp.squad, { rng: rng, log: true });
+    startPlayback(res);
+  }
 
-    // Показываем отчёт и восстанавливаем поле: позиции после боя в merge-игре
-    // не сохраняются, а энергия остаётся потраченной — так игрок увидит,
-    // сколько стоила попытка.
+  /* Кнопка скорости: бои по 12–18 секунд смотреть в темпе реального времени
+     скучно, но и мгновенный перескок ничего не объясняет. Поэтому скорость
+     переключается, а не спрятана. */
+  function cycleSpeed() {
+    if (!fight) return;
+    fight.speed = fight.speed === 1 ? 2 : fight.speed === 2 ? 4 : 1;
+    els.speedBtn.textContent = fight.speed + "×";
+  }
+
+  function updateTickLabel() {
+    if (!fight || !els.tickLabel) return;
+    var last = fight.events.length ? fight.events[fight.events.length - 1].tick : 0;
+    var shown = Math.min(last, fight.events.length ? fight.events[fight.index - 1] ? fight.events[fight.index - 1].tick : 0 : 0);
+    els.tickLabel.textContent = shown + " / " + last;
+  }
+
+  /* -------------------------------------------------------------------------
+     ПОВТОР БОЯ
+     ---------------------------------------------------------------------------
+     Бой посчитан целиком заранее, дальше он проигрывается по событиям.
+     Так можно крутить скорость, останавливать и проматывать назад, не
+     пересчитывая ничего.
+
+     Повтор идёт в игровом масштабе времени: настоящий бой длится 12–18
+     секунд, и показывать его «как в жизни» значит заставить рекрутера
+     ждать. Тики идут с ускорением, но порядок и длительность боя в секундах
+     остаются настоящими и показываются в отчёте.
+     ------------------------------------------------------------------------- */
+  var TICK_MS = 110;      // длительность одного тика на экране
+  var MAX_FRAME_DT = 120; // иначе после сворачивания вкладки всё проскочит разом
+
+  function startPlayback(res) {
+    stopPlayback();
+
+    // Бой уже посчитан, но сцена живёт отдельно: сущности копируются,
+    // чтобы анимация не могла испортить отчёт.
+    var units = [];
+    var byId = {};
+
+    function add(list, side) {
+      for (var i = 0; i < list.length; i++) {
+        var s = list[i];
+        var u = {
+          id: s.id, arch: s.arch, tier: s.tier,
+          col: s.col, row: s.row, dc: s.col, dr: s.row,
+          hp: s.hp, maxHp: s.maxHp,
+          side: side, anim: 1, alpha: 1, hitFlash: 0, dead: false, showHp: true,
+        };
+        units.push(u);
+        byId[s.id] = u;
+      }
+    }
+    add(res.start.own, "own");
+    add(res.start.enemy, "enemy");
+
+    fight = {
+      res: res,
+      units: units,
+      byId: byId,
+      events: res.events,
+      index: 0,
+      last: 0,
+      speed: 1,
+      paused: false,
+      done: false,
+      raf: 0,
+    };
+
+    view.mode = "fight";
+    view.cols = res.start.cols;
+    view.rows = res.start.rows;
+    view.units = units;
+    view.floating = [];
+
+    // Панель боя появляется вместе с широким полем: подписи сторон нужны
+    // ровно тогда, когда противник наконец на экране.
+    if (els.battleBar) els.battleBar.classList.add("is-visible");
+    if (els.sideLabels) els.sideLabels.classList.add("is-visible");
+    if (els.tickLabel) els.tickLabel.textContent = "0 / " + (res.events.length ? res.events[res.events.length - 1].tick : 0);
+
+    updateHUD();
+    els.board.classList.add("is-fighting");
+    els.log.innerHTML = "";
+    fight.last = performance.now();
+    fight.raf = requestAnimationFrame(stepPlayback);
+  }
+
+  function stopPlayback() {
+    if (fight && fight.raf) cancelAnimationFrame(fight.raf);
+    fight = null;
+    els.board.classList.remove("is-fighting");
+    if (els.battleBar) els.battleBar.classList.remove("is-visible");
+  }
+
+  function stepPlayback(now) {
+    if (!fight) return;
+    /* dt зажат снизу нулём: отметка первого кадра rAF бывает раньше
+       того момента, когда был создан повтор, и разность уходит в минус.
+       Отрицательное время уводит счётчик тиков в отрицательную зону,
+       и он уже не догоняет единицу — бой зависает на нулевом тике. */
+    var dt = Math.max(0, Math.min(now - fight.last, MAX_FRAME_DT));
+    fight.last = now;
+
+    if (!fight.paused) {
+      var tickMs = TICK_MS / fight.speed;
+      var advance = dt / tickMs;
+      fight.clock = (fight.clock || 0) + advance;
+      // fight проверяется и внутри цикла: applyNextTick на последнем
+      // тике вызывает finishPlayback, а та обнуляет переменную. Без
+      // проверки следующая итерация читала уже пустой объект.
+      while (fight && fight.clock >= 1 && !fight.done) {
+        fight.clock -= 1;
+        applyNextTick();
+      }
+    }
+
+    // Повтор мог закончиться прямо в applyNextTick выше.
+    if (!fight) return;
+
+    animateUnits(dt);
+    drawScene();
+
+    if (!fight.done) {
+      fight.raf = requestAnimationFrame(stepPlayback);
+    }
+  }
+
+  /* Один тик событий. События за тик применяются подряд, поэтому попадания
+     одного и того же тика не разлетаются по разным кадрам. */
+  function applyNextTick() {
+    var evs = fight.events;
+    // Граница проверяется ДО обращения к элементу: при исчерпанных
+    // событиях evs[fight.index] — это undefined, и чтение .tick падало
+    // исключением раньше, чем доходил до проверки. Повтор зависал на
+    // последнем тике и никогда не показывал результат.
+    if (!evs.length || fight.index >= evs.length) {
+      finishPlayback();
+      return;
+    }
+
+    var tickNo = evs[fight.index].tick;
+
+    while (fight.index < evs.length && evs[fight.index].tick === tickNo) {
+      applyEvent(evs[fight.index]);
+      fight.index++;
+    }
+
+    updateTickLabel();
+  }
+
+  function applyEvent(ev) {
+    if (ev.type === "move") {
+      var m = fight.byId[ev.id];
+      if (!m || m.dead) return;
+      m.dc = m.col;
+      m.dr = m.row;
+      m.col = ev.to.col;
+      m.row = ev.to.row;
+      m.anim = 0;          // плавно догоняет новую клетку
+      return;
+    }
+
+    if (ev.type !== "hit") return;
+
+    var target = fight.byId[ev.targetId];
+    var attacker = fight.byId[ev.id];
+    if (!target || target.dead) return;
+
+    target.hp = ev.hpAfter;
+    target.hitFlash = 1;
+
+    pushFloat(target, "−" + ev.amount, "#F2A0A0");
+
+    if (ev.dead) {
+      target.dead = true;
+      pushFloat(target, "✕", "#D07070");
+      if (attacker) attacker.hitFlash = 0.5;
+    }
+  }
+
+  /* Всплывающее число ударного урона. Клетку запоминаем, а не пиксели:
+     размер поля меняется при повороте экрана и ресайзе, и сохранённые
+     координаты увели бы число не туда. */
+  function pushFloat(u, text, color) {
+    view.floating.push({
+      text: text,
+      color: color,
+      col: u.col,
+      row: u.row,
+      age: 0,
+      life: 0.9,
+    });
+  }
+
+  function animateUnits(dt) {
+    var k = Math.min(1, dt / 90);
+    for (var i = 0; i < view.units.length; i++) {
+      var u = view.units[i];
+      if (u.anim < 1) u.anim = Math.min(1, u.anim + k);
+      if (u.hitFlash > 0) u.hitFlash = Math.max(0, u.hitFlash - dt / 180);
+      if (u.dead && u.alpha > 0) {
+        // Смерть не исчезает мгновенно: юнит сжимается и гаснет, иначе
+        // из сцены вычёркивается половина бойцов без следа.
+        u.alpha = Math.max(0, u.alpha - dt / 420);
+        u.anim = Math.min(1, u.anim + dt / 500);
+      }
+    }
+
+    for (var f = view.floating.length - 1; f >= 0; f--) {
+      view.floating[f].age += dt / 1000;
+      if (view.floating[f].age >= view.floating[f].life) view.floating.splice(f, 1);
+    }
+  }
+
+  function finishPlayback() {
+    if (!fight || fight.done) return;
+    fight.done = true;
+
+    var res = fight.res;
     var title = res.winner === "win" ? labText("combat", "victory")
       : res.winner === "loss" ? labText("combat", "defeat") : "—";
 
     renderCombat(res, title);
-
-    els.board.classList.remove("is-fighting");
+    stopPlayback();
     els.fightBtn.disabled = ENGINE.countUnits(grid) === 0;
   }
 
-  /* Бой показывается в отчёте, а не в реальном времени: анимация на тиках
-     занимает время рекрутера, а цифры читаются сразу. */
   function renderCombat(res, title) {
     els.result.className = "lab-result tone-" + (res.winner === "win" ? "good" : res.winner === "loss" ? "bad" : "muted");
     els.result.innerHTML = "";
@@ -331,12 +661,12 @@ var LAB = (function () {
 
     var meta = document.createElement("div");
     meta.className = "result-meta";
-    meta.textContent = res.seconds + " с · " + res.ticks + " тиков · осталось " +
-      res.ownLeft + " из " + (res.ownLeft + (res.enemyLeft || 0));
+    meta.textContent = res.seconds + " с · " + res.ticks + " тиков · " +
+      res.ownLeft + " против " + res.enemyLeft;
     els.result.appendChild(meta);
 
     els.log.innerHTML = "";
-    var lines = res.log.slice(0, 14);
+    var lines = res.log.slice(-14);
     for (var i = lines.length - 1; i >= 0; i--) {
       var d = document.createElement("div");
       d.className = "log-line log-" + (lines[i].tone || "muted");
@@ -432,10 +762,24 @@ var LAB = (function () {
 
     // Всё, что читает модель, пересчитывается сразу — это и есть
     // демонстрация единого источника правды, а не обещание.
-    drawBoard();
+    // Правка работает и посреди боя: иначе выглядело бы, будто таблица
+    // подключена не ко всему.
+    refreshScene();
     drawPalette();
     drawCharts();
     updateVerdict();
+  }
+
+  /* Перерисовка сцены в том режиме, в котором она сейчас живёт:
+     узкое поле сборки или широкое поле боя. */
+  function refreshScene() {
+    if (fight) {
+      view.units = fight.units;
+      drawScene();
+    } else {
+      view.units = listUnitsForView();
+      drawScene();
+    }
   }
 
   function restoreDefaults() {
@@ -447,7 +791,7 @@ var LAB = (function () {
       }
     }
     renderTable();
-    drawBoard();
+    refreshScene();
     drawPalette();
     drawCharts();
     updateVerdict();
@@ -736,15 +1080,26 @@ var LAB = (function () {
       buy(c, r);
     });
 
-    els.fightBtn.addEventListener("click", fight);
+    els.fightBtn.addEventListener("click", startFight);
     els.resetBtn.addEventListener("click", resetBoard);
     els.runBtn.addEventListener("click", runSimulation);
     els.restoreBtn.addEventListener("click", restoreDefaults);
     els.copyBtn.addEventListener("click", copyTable);
+    els.speedBtn.addEventListener("click", cycleSpeed);
 
+    // Повтор держит собственную петлю кадров, поэтому при ресайзе
+    // перерисовываем сцену напрямую: иначе на полпути к остановке
+    // картинка оставалась бы в старых размерах.
     window.addEventListener("resize", function () {
-      drawBoard();
+      drawScene();
       drawCharts();
+    });
+
+    // Уход со вкладки не должен доигрывать весь бой в молчании.
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden && fight && !fight.done) {
+        fight.paused = true;
+      }
     });
   }
 
@@ -792,11 +1147,31 @@ var LAB = (function () {
       winrateMeta: document.getElementById("winrateMeta"),
       verdict: document.getElementById("labVerdict"),
       runBtn: document.getElementById("labRun"),
+      speedBtn: document.getElementById("labSpeed"),
+      tickLabel: document.getElementById("labTick"),
+      sideLabels: document.getElementById("labSides"),
+      battleBar: document.getElementById("labBattleBar"),
     };
     snapshotDefaults();
     bind();
     rebuild();
   }
 
-  return { init: init, rebuild: rebuild, drawCharts: drawCharts, updateVerdict: updateVerdict };
+  return {
+    init: init,
+    rebuild: rebuild,
+    drawCharts: drawCharts,
+    updateVerdict: updateVerdict,
+    drawScene: drawScene,
+    isFighting: function () { return !!fight; },
+    // Отладочный доступ к состоянию боя: без него нельзя понять, что
+    // происходит внутри повтора, — снаружи видно только «идёт / не идёт».
+    state: function () {
+      return fight ? {
+        clock: fight.clock, index: fight.index, speed: fight.speed,
+        paused: fight.paused, done: fight.done, events: fight.events.length,
+        units: fight.units.length,
+      } : null;
+    },
+  };
 })();
