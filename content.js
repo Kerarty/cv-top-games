@@ -297,13 +297,18 @@ var CONTENT = {
       phone: "Телефон",
       github: "GitHub",
       note: "Работа удалённая, часовой пояс UTC+3 — студия в пяти часовых поясах, сходимся легко.",
-      pdf: "Сохранить в PDF",
+      download: "Скачать резюме в PDF",
+      downloadHint:
+        "Одна страница A4 на случай, если формат с игрой неудобен читать " +
+        "или не открывается. Там то же самое без интерактива.",
+      print: "Сохранить страницу в PDF",
     },
 
     changelog: {
       heading: "changelog",
       lead: "Резюме как релиз. Каждая строка — что изменилось и зачем.",
       lines: [
+        { v: "v0.5", t: "Резюме одной страницей выложено файлом для скачивания", d: "на случай, если игру открывать неудобно" },
         { v: "v0.4", t: "Бой показан целиком: противник на своём поле, полосы здоровья, урон по тикам", d: "результат без процесса ничего не доказывает" },
         { v: "v0.3", t: "Добавлен прогон 1000 боёв и вердикт по винрейту", d: "визуализация проблемы" },
         { v: "v0.2", t: "Таблица характеристик стала редактируемой", d: "проверка гипотез руками, а не на словах" },
@@ -610,13 +615,18 @@ var CONTENT = {
       phone: "Phone",
       github: "GitHub",
       note: "Remote work, UTC+3 — the studio spans five time zones and we overlap easily.",
-      pdf: "Save as PDF",
+      download: "Download résumé as PDF",
+      downloadHint:
+        "A single A4 page, in case the interactive format is awkward to read " +
+        "or does not open. Same content, without the interactivity.",
+      print: "Save this page as PDF",
     },
 
     changelog: {
       heading: "changelog",
       lead: "The résumé as a release. Every line is what changed and why.",
       lines: [
+        { v: "v0.5", t: "One-page résumé posted as a file to download", d: "in case the interactive build is awkward to open" },
         { v: "v0.4", t: "The fight is shown in full: opponent on its own side, health bars, damage by tick", d: "a result without the process proves nothing" },
         { v: "v0.3", t: "Added the 1000-battle run and the winrate verdict", d: "making the problem visible" },
         { v: "v0.2", t: "The stats table became editable", d: "testing hypotheses by hand, not in words" },

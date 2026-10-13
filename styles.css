@@ -376,6 +376,13 @@ a { color: inherit; }
 
 .changelog { margin-top: 46px; padding: 26px; border-radius: var(--r); background: var(--card); border: 1px solid var(--border); }
 .changelog h3 { font: 700 18px var(--mono); color: var(--accent-text); margin-bottom: 8px; }
+
+/* Скачивание PDF. Стоит отдельно от кнопки печати: это разные вещи.
+   Кнопка печати отдаёт эту же страницу, ссылка — готовый файл,
+   который не зависит ни от браузера, ни от того, открылся ли скрипт. */
+.dl { margin-top: 30px; padding: 24px; border-radius: var(--r); border: 1px solid var(--border); text-align: center; }
+.dl .btn { margin-bottom: 14px; }
+.dl .note { margin: 0 auto; }
 .chlog { margin-top: 16px; display: flex; flex-direction: column; }
 .log-row { display: grid; grid-template-columns: 60px 1fr; gap: 14px; padding: 13px 0; border-top: 1px solid var(--border); }
 .log-v { font: 700 13px var(--mono); color: var(--accent-text); }
