@@ -6,7 +6,7 @@
 <meta name="description" content="Интерактивное резюме геймдизайнера: рабочий баланс-тюнер merge-автобатлера. Симулятор боёв, редактируемая таблица характеристик, графики TTK и винрейта.">
 <meta name="theme-color" content="#0C0C0F">
 <title>Ярослав Кукар — геймдизайнер, баланс систем</title>
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css?v=0.5">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230C0C0F'/><path d='M8 22 L16 9 L24 22 Z' fill='none' stroke='%23E5AC3F' stroke-width='2.4' stroke-linejoin='round'/></svg>">
 </head>
 <body>
@@ -289,10 +289,14 @@
   </div>
 </footer>
 
-<script src="content.js"></script>
-<script src="balance.js"></script>
-<script src="engine.js"></script>
-<script src="lab.js"></script>
-<script src="main.js"></script>
+<!-- Версия в ссылках обязана совпадать с BALANCE.version и с последней
+     строкой changelog. GitHub Pages держит файлы в кэше десять минут,
+     и без метки рекрутер получает новую разметку со старым скриптом:
+     кнопка есть, а текста в ней нет. С меткой меняется ключ кэша. -->
+<script src="content.js?v=0.5"></script>
+<script src="balance.js?v=0.5"></script>
+<script src="engine.js?v=0.5"></script>
+<script src="lab.js?v=0.5"></script>
+<script src="main.js?v=0.5"></script>
 </body>
 </html>
