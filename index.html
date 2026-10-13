@@ -1,24 +1,24 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="РРЅС‚РµСЂР°РєС‚РёРІРЅРѕРµ СЂРµР·СЋРјРµ РіРµР№РјРґРёР·Р°Р№РЅРµСЂР°: СЂР°Р±РѕС‡РёР№ Р±Р°Р»Р°РЅСЃ-С‚СЋРЅРµСЂ merge-Р°РІС‚РѕР±Р°С‚Р»РµСЂР°. РЎРёРјСѓР»СЏС‚РѕСЂ Р±РѕС‘РІ, СЂРµРґР°РєС‚РёСЂСѓРµРјР°СЏ С‚Р°Р±Р»РёС†Р° С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРє, РіСЂР°С„РёРєРё TTK Рё РІРёРЅСЂРµР№С‚Р°.">
+<meta name="description" content="Интерактивное резюме геймдизайнера: рабочий баланс-тюнер merge-автобатлера. Симулятор боёв, редактируемая таблица характеристик, графики TTK и винрейта.">
 <meta name="theme-color" content="#0C0C0F">
-<title>РЇСЂРѕСЃР»Р°РІ РљСѓРєР°СЂ вЂ” РіРµР№РјРґРёР·Р°Р№РЅРµСЂ, Р±Р°Р»Р°РЅСЃ СЃРёСЃС‚РµРј</title>
-<link rel="stylesheet" href="styles.css?v=0.6">
+<title>Ярослав Кукар — геймдизайнер, баланс систем</title>
+<link rel="stylesheet" href="styles.css?v=0.7">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230C0C0F'/><path d='M8 22 L16 9 L24 22 Z' fill='none' stroke='%23E5AC3F' stroke-width='2.4' stroke-linejoin='round'/></svg>">
 </head>
 <body>
 
-<!-- РЁРђРџРљРђ ---------------------------------------------------------------- -->
+<!-- ШАПКА ---------------------------------------------------------------- -->
 <header class="topbar">
   <div class="wrap topbar-in">
     <a class="brand" href="#hero">
-      <span class="brand-name">РЇСЂРѕСЃР»Р°РІ РљСѓРєР°СЂ</span>
+      <span class="brand-name">Ярослав Кукар</span>
       <span class="brand-role" data-i18n="role"></span>
     </a>
-    <nav class="nav" aria-label="Р Р°Р·РґРµР»С‹">
+    <nav class="nav" aria-label="Разделы">
       <a href="#lab" data-spy data-i18n="nav.lab"></a>
       <a href="#about" data-spy data-i18n="nav.about"></a>
       <a href="#education" data-spy data-i18n="nav.education"></a>
@@ -27,9 +27,9 @@
       <a href="#skills" data-spy data-i18n="nav.skills"></a>
       <a href="#contacts" data-spy class="nav-cta" data-i18n="nav.contacts"></a>
     </nav>
-    <!-- РЎСЃС‹Р»РєР° РЅР° PDF СЃС‚РѕРёС‚ РІ С€Р°РїРєРµ, Р° РЅРµ С‚РѕР»СЊРєРѕ РІРЅРёР·Сѓ: С‡РµР»РѕРІРµРє, РєРѕС‚РѕСЂС‹Р№
-         РѕС‚РєСЂС‹Р» СЂРµР·СЋРјРµ, СЂРµС€Р°РµС‚ Р·Р° С‚СЂРё СЃРµРєСѓРЅРґС‹, РѕС‚РєСЂРѕРµС‚ РѕРЅ РёРіСЂСѓ РёР»Рё С„Р°Р№Р».
-         Р•СЃР»Рё PDF СЃРїСЂСЏС‚Р°РЅ РІРЅРёР·Сѓ СЃС‚СЂР°РЅРёС†С‹, РїРѕР»РѕРІРёРЅР° РµРіРѕ РЅРµ РЅР°Р№РґС‘С‚. -->
+    <!-- Ссылка на PDF стоит в шапке, а не только внизу: человек, который
+         открыл резюме, решает за три секунды, откроет он игру или файл.
+         Если PDF спрятан внизу страницы, половина его не найдёт. -->
     <a class="pdf-chip" href="assets/resume.pdf" download="Yaroslav_Kukar_Game_Designer.pdf"
        data-i18n="nav.pdf" data-i18n-aria="nav.pdfFull"></a>
     <button id="langBtn" class="lang" type="button" aria-label="Switch language">EN</button>
@@ -52,7 +52,7 @@
   </div>
 </section>
 
-<!-- 01 / Р›РђР‘РћР РђРўРћР РРЇ ---------------------------------------------------- -->
+<!-- 01 / ЛАБОРАТОРИЯ ---------------------------------------------------- -->
 <section id="lab" class="sec">
   <div class="wrap">
     <header class="sec-head" data-reveal>
@@ -62,13 +62,13 @@
     </header>
 
     <div class="lab" data-reveal>
-      <div class="tabs" role="tablist" aria-label="Р›Р°Р±РѕСЂР°С‚РѕСЂРёСЏ">
+      <div class="tabs" role="tablist" aria-label="Лаборатория">
         <button class="tab is-active" role="tab" data-tab="combat" data-i18n="lab.tabs.combat" aria-selected="true" tabindex="0"></button>
         <button class="tab" role="tab" data-tab="table" data-i18n="lab.tabs.table" aria-selected="false" tabindex="-1"></button>
         <button class="tab" role="tab" data-tab="stats" data-i18n="lab.tabs.stats" aria-selected="false" tabindex="-1"></button>
       </div>
 
-      <!-- Р‘РћР™ -->
+      <!-- БОЙ -->
       <div class="panel is-active" data-panel="combat">
         <div class="panel-head">
           <h3 data-i18n="lab.combat.title"></h3>
@@ -86,10 +86,10 @@
               <span class="side-vs">VS</span>
               <span class="side-tag side-enemy" data-i18n="lab.combat.enemy"></span>
             </div>
-            <canvas id="labBoard" aria-label="РџРѕР»Рµ Р±РѕСЏ"></canvas>
+            <canvas id="labBoard" aria-label="Поле боя"></canvas>
             <div class="battle-bar" id="labBattleBar">
               <span class="battle-tick" id="labTick">0 / 0</span>
-              <button id="labSpeed" class="btn btn-ghost btn-xs" type="button">1Г—</button>
+              <button id="labSpeed" class="btn btn-ghost btn-xs" type="button">1×</button>
             </div>
             <p class="lab-prompt" data-i18n="lab.combat.prompt"></p>
           </div>
@@ -108,7 +108,7 @@
         </div>
       </div>
 
-      <!-- РўРђР‘Р›РР¦Рђ -->
+      <!-- ТАБЛИЦА -->
       <div class="panel" data-panel="table">
         <div class="panel-head">
           <h3 data-i18n="lab.table.title"></h3>
@@ -124,7 +124,7 @@
         <p class="note" data-i18n="lab.table.note"></p>
       </div>
 
-      <!-- Р“Р РђР¤РРљР -->
+      <!-- ГРАФИКИ -->
       <div class="panel" data-panel="stats">
         <div class="panel-head">
           <h3 data-i18n="lab.stats.title"></h3>
@@ -159,7 +159,7 @@
           <div class="sim-head">
             <div>
               <b data-i18n="lab.stats.winrate"></b>
-              <div class="winrate-value" id="winrateValue">вЂ”</div>
+              <div class="winrate-value" id="winrateValue">—</div>
               <div class="winrate-meta" id="winrateMeta"></div>
             </div>
             <button id="labRun" class="btn btn-primary" type="button" data-i18n="lab.stats.run"></button>
@@ -174,7 +174,7 @@
   </div>
 </section>
 
-<!-- 02 / Рћ РЎР•Р‘Р• --------------------------------------------------------- -->
+<!-- 02 / О СЕБЕ --------------------------------------------------------- -->
 <section id="about" class="sec">
   <div class="wrap">
     <header class="sec-head" data-reveal>
@@ -194,7 +194,7 @@
   </div>
 </section>
 
-<!-- 03 / РћР‘Р РђР—РћР’РђРќРР• ---------------------------------------------------- -->
+<!-- 03 / ОБРАЗОВАНИЕ ---------------------------------------------------- -->
 <section id="education" class="sec">
   <div class="wrap">
     <header class="sec-head" data-reveal>
@@ -222,7 +222,7 @@
   </div>
 </section>
 
-<!-- 04 / РџР РћР•РљРўР« -------------------------------------------------------- -->
+<!-- 04 / ПРОЕКТЫ -------------------------------------------------------- -->
 <section id="projects" class="sec">
   <div class="wrap">
     <header class="sec-head" data-reveal>
@@ -233,7 +233,7 @@
   </div>
 </section>
 
-<!-- 05 / РњР•РўРћР” ---------------------------------------------------------- -->
+<!-- 05 / МЕТОД ---------------------------------------------------------- -->
 <section id="process" class="sec">
   <div class="wrap">
     <header class="sec-head" data-reveal>
@@ -249,7 +249,7 @@
   </div>
 </section>
 
-<!-- 06 / РќРђР’Р«РљР --------------------------------------------------------- -->
+<!-- 06 / НАВЫКИ --------------------------------------------------------- -->
 <section id="skills" class="sec">
   <div class="wrap">
     <header class="sec-head" data-reveal>
@@ -261,7 +261,7 @@
   </div>
 </section>
 
-<!-- 07 / РљРћРќРўРђРљРўР« + CHANGELOG ------------------------------------------ -->
+<!-- 07 / КОНТАКТЫ + CHANGELOG ------------------------------------------ -->
 <section id="contacts" class="sec sec-last">
   <div class="wrap">
     <header class="sec-head" data-reveal>
@@ -294,14 +294,19 @@
   </div>
 </footer>
 
-<!-- Р’РµСЂСЃРёСЏ РІ СЃСЃС‹Р»РєР°С… РѕР±СЏР·Р°РЅР° СЃРѕРІРїР°РґР°С‚СЊ СЃ BALANCE.version Рё СЃ РїРѕСЃР»РµРґРЅРµР№
-     СЃС‚СЂРѕРєРѕР№ changelog. GitHub Pages РґРµСЂР¶РёС‚ С„Р°Р№Р»С‹ РІ РєСЌС€Рµ РґРµСЃСЏС‚СЊ РјРёРЅСѓС‚,
-     Рё Р±РµР· РјРµС‚РєРё СЂРµРєСЂСѓС‚РµСЂ РїРѕР»СѓС‡Р°РµС‚ РЅРѕРІСѓСЋ СЂР°Р·РјРµС‚РєСѓ СЃРѕ СЃС‚Р°СЂС‹Рј СЃРєСЂРёРїС‚РѕРј:
-     РєРЅРѕРїРєР° РµСЃС‚СЊ, Р° С‚РµРєСЃС‚Р° РІ РЅРµР№ РЅРµС‚. РЎ РјРµС‚РєРѕР№ РјРµРЅСЏРµС‚СЃСЏ РєР»СЋС‡ РєСЌС€Р°. -->
-<script src="content.js?v=0.6"></script>
-<script src="balance.js?v=0.6"></script>
-<script src="engine.js?v=0.6"></script>
-<script src="lab.js?v=0.6"></script>
-<script src="main.js?v=0.6"></script>
+<!-- Версия в ссылках обязана совпадать с BALANCE.version и с последней
+     строкой changelog. GitHub Pages держит файлы в кэше десять минут,
+     и без метки рекрутер получает новую разметку со старым скриптом:
+     кнопка есть, а текста в ней нет. С меткой меняется ключ кэша.
+
+     Правь этот файл только через редактор, который пишет UTF-8. Если
+     прогнать его через перенаправление в консоли без явной кодировки,
+     кириллица прочитается как системная и запишется обратно дважды
+     закодированной: браузер покажет «РїСЪЬСЇРѕР°Рї» вместо имени. -->
+<script src="content.js?v=0.7"></script>
+<script src="balance.js?v=0.7"></script>
+<script src="engine.js?v=0.7"></script>
+<script src="lab.js?v=0.7"></script>
+<script src="main.js?v=0.7"></script>
 </body>
 </html>

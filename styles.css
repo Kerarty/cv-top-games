@@ -82,7 +82,13 @@ a { color: inherit; }
   backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--border);
 }
-.topbar-in { display: flex; align-items: center; gap: 20px; min-height: 62px; }
+.topbar-in {
+  display: flex; align-items: center; gap: 14px; min-height: 62px;
+  /* Шапка шире основного текста: семь пунктов меню, имя, ссылка на PDF и
+     переключатель языка в общий контейнер на 1120px не помещались, и
+     последний пункт наезжал на чип. Читать это было невозможно. */
+  max-width: 1400px;
+}
 .brand { display: flex; align-items: baseline; gap: 10px; text-decoration: none; margin-right: auto; flex-wrap: nowrap; white-space: nowrap; min-width: 0; }
 .brand-name { font: 700 17px var(--display); white-space: nowrap; }
 .brand-role {
@@ -92,7 +98,10 @@ a { color: inherit; }
   overflow: hidden; text-overflow: ellipsis; max-width: 190px; white-space: nowrap;
 }
 
-.nav { display: flex; gap: 4px; align-items: center; min-width: 0; }
+/* Пункты меню могут сжиматься и обрезаться, но никогда не наезжают на
+   то, что справа от них. Пунктов много, а места в строке мало, и
+   последний раньше наползал на кнопку PDF — читалось как каша. */
+.nav { display: flex; gap: 4px; align-items: center; min-width: 0; overflow: hidden; }
 .nav a {
   padding: 8px 13px; border-radius: 999px;
   font-size: 14px; color: var(--muted); text-decoration: none; white-space: nowrap;
@@ -103,6 +112,8 @@ a { color: inherit; }
 .nav-cta { color: var(--ink); border: 1px solid var(--border-str); }
 
 .lang {
+  flex: 0 0 auto;
+  position: relative; z-index: 1;
   min-width: 46px; min-height: 36px;
   border-radius: 999px; border: 1px solid var(--border-str);
   background: transparent; color: var(--ink);
@@ -115,9 +126,11 @@ a { color: inherit; }
 /* Ссылка на PDF в шапке. Отдельный класс, потому что это не пункт меню:
    у него нет подчёркивания при наведении, он не подсвечивается как
    активная секция и обязан выглядеть кнопкой. Иначе в списке ссылок
-   он теряется среди названий разделов. */
+   он теряется среди названий разделов.
+   Сжаться не может: это кнопка, и обрезанная надпись хуже, чем полная. */
 .pdf-chip {
   flex: 0 0 auto;
+  position: relative; z-index: 1;
   min-width: 52px; height: 32px;
   display: inline-flex; align-items: center; justify-content: center;
   padding: 0 12px; margin-left: 6px;
