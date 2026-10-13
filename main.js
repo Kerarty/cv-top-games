@@ -64,10 +64,14 @@
       }
     }
 
-    // aria-label у кнопок с иконками
+    // Подписи для элементов с короткой надписью: aria-label для
+    // скринридеров и title для подсказки при наведении. Без title
+    // метка «PDF» остаётся загадкой — что за файл и что с ним будет.
     var labels = document.querySelectorAll("[data-i18n-aria]");
     for (var j = 0; j < labels.length; j++) {
-      labels[j].setAttribute("aria-label", lookup(labels[j].getAttribute("data-i18n-aria")));
+      var text = lookup(labels[j].getAttribute("data-i18n-aria"));
+      labels[j].setAttribute("aria-label", text);
+      labels[j].setAttribute("title", text);
     }
 
     els.langBtn.textContent = CONTENT[lang].langButton;

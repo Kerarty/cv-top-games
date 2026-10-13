@@ -32,6 +32,8 @@ var CONTENT = {
       process: "Метод",
       skills: "Навыки",
       contacts: "Контакты",
+      pdf: "PDF",
+      pdfFull: "Скачать резюме в PDF",
       text: "Резюме текстом",
     },
 
@@ -308,6 +310,7 @@ var CONTENT = {
       heading: "changelog",
       lead: "Резюме как релиз. Каждая строка — что изменилось и зачем.",
       lines: [
+        { v: "v0.6", t: "Ссылка на PDF переехала в шапку — файл виден сразу, а не после прокрутки", d: "решение за три секунды, а не после пяти минут чтения" },
         { v: "v0.5", t: "Резюме одной страницей выложено файлом для скачивания", d: "на случай, если игру открывать неудобно" },
         { v: "v0.4", t: "Бой показан целиком: противник на своём поле, полосы здоровья, урон по тикам", d: "результат без процесса ничего не доказывает" },
         { v: "v0.3", t: "Добавлен прогон 1000 боёв и вердикт по винрейту", d: "визуализация проблемы" },
@@ -347,6 +350,8 @@ var CONTENT = {
       process: "Method",
       skills: "Skills",
       contacts: "Contacts",
+      pdf: "PDF",
+      pdfFull: "Download résumé as PDF",
       text: "Résumé as text",
     },
 
@@ -626,6 +631,7 @@ var CONTENT = {
       heading: "changelog",
       lead: "The résumé as a release. Every line is what changed and why.",
       lines: [
+        { v: "v0.6", t: "The PDF link moved to the header — the file is visible immediately, not after scrolling", d: "a decision made in three seconds, not after five minutes of reading" },
         { v: "v0.5", t: "One-page résumé posted as a file to download", d: "in case the interactive build is awkward to open" },
         { v: "v0.4", t: "The fight is shown in full: opponent on its own side, health bars, damage by tick", d: "a result without the process proves nothing" },
         { v: "v0.3", t: "Added the 1000-battle run and the winrate verdict", d: "making the problem visible" },
