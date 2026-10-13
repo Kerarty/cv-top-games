@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Интерактивное резюме геймдизайнера: рабочий баланс-тюнер merge-автобатлера. Симулятор боёв, редактируемая таблица характеристик, графики TTK и винрейта.">
+<meta name="theme-color" content="#0C0C0F">
+<title>Ярослав Кукар — геймдизайнер, баланс систем</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230C0C0F'/><path d='M8 22 L16 9 L24 22 Z' fill='none' stroke='%23E5AC3F' stroke-width='2.4' stroke-linejoin='round'/></svg>">
+</head>
+<body>
+
+<!-- ШАПКА ---------------------------------------------------------------- -->
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <a class="brand" href="#hero">
+      <span class="brand-name">Ярослав Кукар</span>
+      <span class="brand-role" data-i18n="role"></span>
+    </a>
+    <nav class="nav" aria-label="Разделы">
+      <a href="#lab" data-spy data-i18n="nav.lab"></a>
+      <a href="#about" data-spy data-i18n="nav.about"></a>
+      <a href="#projects" data-spy data-i18n="nav.projects"></a>
+      <a href="#process" data-spy data-i18n="nav.process"></a>
+      <a href="#skills" data-spy data-i18n="nav.skills"></a>
+      <a href="#contacts" data-spy class="nav-cta" data-i18n="nav.contacts"></a>
+    </nav>
+    <button id="langBtn" class="lang" type="button" aria-label="Switch language">EN</button>
+  </div>
+</header>
+
+<main>
+
+<!-- 00 / HERO ------------------------------------------------------------ -->
+<section id="hero" class="hero">
+  <div class="wrap">
+    <p class="kicker" data-i18n="hero.kicker"></p>
+    <h1 class="hero-title" data-i18n="hero.title"></h1>
+    <p class="hero-sub" data-i18n="hero.sub"></p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="#lab" data-i18n="hero.cta"></a>
+      <a class="btn" href="#about" data-i18n="hero.ctaAlt"></a>
+    </div>
+    <div id="heroStats" class="stats"></div>
+  </div>
+</section>
+
+<!-- 01 / ЛАБОРАТОРИЯ ---------------------------------------------------- -->
+<section id="lab" class="sec">
+  <div class="wrap">
+    <header class="sec-head" data-reveal>
+      <p class="sec-num">01</p>
+      <h2 class="sec-title" data-i18n="lab.heading"></h2>
+      <p class="sec-lead" data-i18n="lab.lead"></p>
+    </header>
+
+    <div class="lab" data-reveal>
+      <div class="tabs" role="tablist" aria-label="Лаборатория">
+        <button class="tab is-active" role="tab" data-tab="combat" data-i18n="lab.tabs.combat" aria-selected="true" tabindex="0"></button>
+        <button class="tab" role="tab" data-tab="table" data-i18n="lab.tabs.table" aria-selected="false" tabindex="-1"></button>
+        <button class="tab" role="tab" data-tab="stats" data-i18n="lab.tabs.stats" aria-selected="false" tabindex="-1"></button>
+      </div>
+
+      <!-- БОЙ -->
+      <div class="panel is-active" data-panel="combat">
+        <div class="panel-head">
+          <h3 data-i18n="lab.combat.title"></h3>
+          <p data-i18n="lab.combat.text"></p>
+        </div>
+
+        <div class="lab-fight">
+          <div class="lab-board-wrap">
+            <div class="hud">
+              <span class="hud-item"><b id="labEnergy">0</b> <span data-i18n="lab.combat.energy"></span></span>
+              <span class="hud-item"><b id="labUnits">0</b> <span data-i18n="lab.combat.you"></span></span>
+            </div>
+            <canvas id="labBoard" aria-label="Поле отряда"></canvas>
+            <p class="lab-prompt" data-i18n="lab.combat.prompt"></p>
+          </div>
+
+          <aside class="lab-side">
+            <div id="labResult" class="lab-result"></div>
+            <div class="pal-title" data-i18n="lab.combat.buy"></div>
+            <div id="labPalette" class="palette"></div>
+            <div class="lab-actions">
+              <button id="labFight" class="btn btn-primary" type="button" data-i18n="lab.combat.fight"></button>
+              <button id="labReset" class="btn btn-ghost" type="button" data-i18n="lab.combat.reset"></button>
+            </div>
+            <div class="log-title" data-i18n="lab.combat.log"></div>
+            <div id="labLog" class="log"></div>
+          </aside>
+        </div>
+      </div>
+
+      <!-- ТАБЛИЦА -->
+      <div class="panel" data-panel="table">
+        <div class="panel-head">
+          <h3 data-i18n="lab.table.title"></h3>
+          <p data-i18n="lab.table.text"></p>
+        </div>
+        <div class="table-wrap">
+          <table id="labTable" class="btable"></table>
+        </div>
+        <div class="table-tools">
+          <button id="labRestore" class="btn btn-ghost" type="button" data-i18n="lab.table.reset"></button>
+          <button id="labCopy" class="btn btn-ghost" type="button" data-i18n="lab.table.export"></button>
+        </div>
+        <p class="note" data-i18n="lab.table.note"></p>
+      </div>
+
+      <!-- ГРАФИКИ -->
+      <div class="panel" data-panel="stats">
+        <div class="panel-head">
+          <h3 data-i18n="lab.stats.title"></h3>
+          <p data-i18n="lab.stats.text"></p>
+        </div>
+
+        <div class="charts">
+          <figure class="chart">
+            <figcaption>
+              <b data-i18n="lab.stats.ttk"></b>
+              <span data-i18n="lab.stats.ttkNote"></span>
+            </figcaption>
+            <canvas id="chartTTK"></canvas>
+          </figure>
+          <figure class="chart">
+            <figcaption>
+              <b data-i18n="lab.stats.dmg"></b>
+              <span data-i18n="lab.stats.dmgNote"></span>
+            </figcaption>
+            <canvas id="chartDmg"></canvas>
+          </figure>
+          <figure class="chart">
+            <figcaption>
+              <b data-i18n="lab.stats.cost"></b>
+              <span data-i18n="lab.stats.costNote"></span>
+            </figcaption>
+            <canvas id="chartCost"></canvas>
+          </figure>
+        </div>
+
+        <div class="sim">
+          <div class="sim-head">
+            <div>
+              <b data-i18n="lab.stats.winrate"></b>
+              <div class="winrate-value" id="winrateValue">—</div>
+              <div class="winrate-meta" id="winrateMeta"></div>
+            </div>
+            <button id="labRun" class="btn btn-primary" type="button" data-i18n="lab.stats.run"></button>
+          </div>
+          <p class="note" data-i18n="lab.stats.runNote"></p>
+          <div id="labHist" class="hist"></div>
+          <div class="verdict-title" data-i18n="lab.stats.verdict"></div>
+          <div id="labVerdict" class="verdict"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 / О СЕБЕ --------------------------------------------------------- -->
+<section id="about" class="sec">
+  <div class="wrap">
+    <header class="sec-head" data-reveal>
+      <p class="sec-num">02</p>
+      <h2 class="sec-title" data-i18n="about.heading"></h2>
+    </header>
+    <div class="about-grid">
+      <div class="about-text" data-reveal>
+        <p class="lead" data-i18n="about.lead"></p>
+        <p data-i18n="about.body"></p>
+      </div>
+      <aside class="about-want" data-reveal>
+        <h3 data-i18n="about.wantTitle"></h3>
+        <ul id="aboutWant"></ul>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- 03 / ПРОЕКТЫ -------------------------------------------------------- -->
+<section id="projects" class="sec">
+  <div class="wrap">
+    <header class="sec-head" data-reveal>
+      <p class="sec-num">03</p>
+      <h2 class="sec-title" data-i18n="projects.heading"></h2>
+    </header>
+    <div id="projectList" class="projects"></div>
+  </div>
+</section>
+
+<!-- 04 / МЕТОД ---------------------------------------------------------- -->
+<section id="process" class="sec">
+  <div class="wrap">
+    <header class="sec-head" data-reveal>
+      <p class="sec-num">04</p>
+      <h2 class="sec-title" data-i18n="process.heading"></h2>
+      <p class="sec-lead" data-i18n="process.lead"></p>
+    </header>
+    <div id="ruleList" class="rules" data-reveal></div>
+    <div class="example" data-reveal>
+      <h3 data-i18n="process.exampleTitle"></h3>
+      <p data-i18n="process.exampleBody"></p>
+    </div>
+  </div>
+</section>
+
+<!-- 05 / НАВЫКИ --------------------------------------------------------- -->
+<section id="skills" class="sec">
+  <div class="wrap">
+    <header class="sec-head" data-reveal>
+      <p class="sec-num">05</p>
+      <h2 class="sec-title" data-i18n="skills.heading"></h2>
+      <p class="sec-lead" data-i18n="skills.lead"></p>
+    </header>
+    <div id="skillGroups" class="skills" data-reveal></div>
+
+    <div class="spec" data-reveal>
+      <h3 data-i18n="spec.heading"></h3>
+      <p class="note" data-i18n="spec.lead"></p>
+      <div id="specRows" class="spec-rows"></div>
+      <h4 class="spec-sub" data-i18n="spec.metricsTitle"></h4>
+      <p class="note" data-i18n="spec.metricsNote"></p>
+      <div id="specMetrics" class="metrics"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 06 / КОНТАКТЫ + CHANGELOG ------------------------------------------ -->
+<section id="contacts" class="sec sec-last">
+  <div class="wrap">
+    <header class="sec-head" data-reveal>
+      <p class="sec-num">06</p>
+      <h2 class="sec-title" data-i18n="contacts.heading"></h2>
+      <p class="sec-lead" data-i18n="contacts.sub"></p>
+    </header>
+    <div id="contactList" class="contacts" data-reveal></div>
+    <p class="note center" data-i18n="contacts.note"></p>
+
+    <div class="changelog" data-reveal>
+      <h3 data-i18n="changelog.heading"></h3>
+      <p class="note" data-i18n="changelog.lead"></p>
+      <div id="changelogList" class="chlog"></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-in">
+    <p class="note" data-i18n="footer.note"></p>
+    <button class="btn btn-ghost btn-sm" type="button" onclick="window.print()" data-i18n="contacts.pdf"></button>
+  </div>
+</footer>
+
+<script src="content.js"></script>
+<script src="balance.js"></script>
+<script src="engine.js"></script>
+<script src="lab.js"></script>
+<script src="main.js"></script>
+</body>
+</html>
